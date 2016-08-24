@@ -24,6 +24,7 @@
  *          Thiago Santos <thiago.sousa.santos@collabora.co.uk>
  *          Emmanuele Bassi <ebassi@linux.intel.com>
  *          Ryan Lortie <desrt@desrt.ca>
+ *          Robert Ancell <robert.ancell@canonical.com>
  */
 
 /* Algorithms within this file are based on the Calendar FAQ by
@@ -885,6 +886,303 @@ g_date_time_new_from_timeval_utc (const GTimeVal *tv)
   g_time_zone_unref (utc);
 
   return datetime;
+}
+
+static gboolean
+get_iso8601_int (const gchar *text, gint length, gint *value)
+{
+  gint i, v = 0;
+
+  for (i = 0; i < length; i++)
+    {
+      gchar c = text[i];
+      if (c < '0' || c > '9')
+        return FALSE;
+      v = v * 10 + (c - '0');
+    }
+
+  *value = v;
+  return TRUE;
+}
+
+static gboolean
+get_iso8601_seconds (const gchar *text, gint length, gdouble *value)
+{
+  gint i;
+  gdouble multiplier = 0.1, v = 0;
+
+  for (i = 0; i < length; i++)
+    {
+      gchar c = text[i];
+      if (c == '.' || c == ',')
+        {
+          i++;
+          break;
+        }
+      if (c < '0' || c > '9')
+        return FALSE;
+      v = v * 10 + (c - '0');
+    }
+
+  for (; i < length; i++)
+    {
+      gchar c = text[i];
+      if (c < '0' || c > '9')
+        return FALSE;
+      v += (c - '0') * multiplier;
+      multiplier *= 0.1;
+    }
+
+  *value = v;
+  return TRUE;
+}
+
+static gboolean
+convert_from_iso8601_ordinal (gint year, gint ordinal_day, gint *month, gint *day)
+{
+  gint m;
+
+  if (ordinal_day < 1)
+    return FALSE;
+
+  for (m = 1; m <= 12; m++)
+    {
+      if (ordinal_day <= days_in_year[GREGORIAN_LEAP (year)][m])
+        {
+          *month = m;
+          *day = ordinal_day - days_in_year[GREGORIAN_LEAP (year)][m - 1];
+          return TRUE;
+        }
+    }
+
+  return FALSE;
+}
+
+static gboolean
+convert_from_iso8601_week (gint year, gint week, gint week_day, gint *offset)
+{
+  gint days, week_offset;
+
+  if (week < 1 || week > 52 || week_day < 1 || week_day > 7)
+    return FALSE;
+
+  /* Work out the day week one starts on */
+  days = ymd_to_days (year, 1, 1);
+  week_offset = -(days % 7);
+  if (week_offset < -3)
+    week_offset += 7;
+
+  *offset = week_offset + ((week - 1) * 7) + week_day;
+  return TRUE;
+}
+
+static gboolean
+parse_iso8601_date (const gchar *text, gint length,
+                    gint *year, gint *month, gint *day, gint *offset)
+{
+  /* YYYY-MM-DD */
+  if (length == 10 && text[4] == '-' && text[7] == '-')
+    {
+      return get_iso8601_int (text, 4, year) &&
+             get_iso8601_int (text + 5, 2, month) &&
+             get_iso8601_int (text + 8, 2, day);
+    }
+  /* YYYY-DDD */
+  else if (length == 8 && text[4] == '-')
+    {
+      gint ordinal_day;
+      return get_iso8601_int (text, 4, year) &&
+             get_iso8601_int (text + 5, 3, &ordinal_day) &&
+             convert_from_iso8601_ordinal (*year, ordinal_day, month, day);
+    }
+  /* YYYY-Www-D */
+  else if (length == 10 && text[4] == '-' && text[5] == 'W' && text[8] == '-')
+    {
+      gint week, week_day;
+      *month = 1;
+      *day = 1;
+      return get_iso8601_int (text, 4, year) &&
+             get_iso8601_int (text + 6, 2, &week) &&
+             get_iso8601_int (text + 9, 1, &week_day) &&
+             convert_from_iso8601_week (*year, week, week_day, offset);
+    }
+  /* YYYYWwwD */
+  else if (length == 8 && text[4] == 'W')
+    {
+      gint week, week_day;
+      *month = 1;
+      *day = 1;
+      return get_iso8601_int (text, 4, year) &&
+             get_iso8601_int (text + 5, 2, &week) &&
+             get_iso8601_int (text + 7, 1, &week_day) &&
+             convert_from_iso8601_week (*year, week, week_day, offset);
+    }
+  /* YYYYMMDD */
+  else if (length == 8)
+    {
+      return get_iso8601_int (text, 4, year) &&
+             get_iso8601_int (text + 4, 2, month) &&
+             get_iso8601_int (text + 6, 2, day);
+    }
+  /* YYYYDDD */
+  else if (length == 7)
+    {
+      gint ordinal_day;
+      return get_iso8601_int (text, 4, year) &&
+             get_iso8601_int (text + 4, 3, &ordinal_day) &&
+             convert_from_iso8601_ordinal (*year, ordinal_day, month, day);
+    }
+  else
+    return FALSE;
+}
+
+static gboolean
+parse_iso8601_timezone (const gchar *text, gint length, GTimeZone **tz)
+{
+  gint offset_hours, offset_minutes;
+
+  /* Z */
+  if (length == 1 && text[0] == 'Z')
+    {
+      offset_hours = 0;
+      offset_minutes = 0;
+    }
+  /* +hh:mm or -hh:mm */
+  else if (length == 6 && (text[0] == '+' || text[0] == '-') && text[3] == ':')
+    {
+      if (!get_iso8601_int (text + 1, 2, &offset_hours) ||
+          !get_iso8601_int (text + 4, 2, &offset_minutes))
+          return FALSE;
+    }
+  /* +hhmm or -hhmm */
+  else if (length == 5 && (text[0] == '+' || text[0] == '-'))
+    {
+      if (!get_iso8601_int (text + 1, 2, &offset_hours) ||
+          !get_iso8601_int (text + 3, 2, &offset_minutes))
+          return FALSE;
+    }
+  /* +hh or -hh */
+  else if (length == 3 && (text[0] == '+' || text[0] == '-'))
+    {
+      if (!get_iso8601_int (text + 1, 2, &offset_hours))
+          return FALSE;
+      offset_minutes = 0;
+    }
+  else
+    return FALSE;
+
+  *tz = g_time_zone_new (text);
+
+  return TRUE;
+}
+
+static gboolean
+parse_iso8601_time (const gchar *text, gint length,
+                    gint *hour, gint *minute, gdouble *seconds, GTimeZone **tz)
+{
+  gint i;
+
+  /* Check for timezone suffix */
+  for (i = 0; i < length; i++)
+    {
+      if (parse_iso8601_timezone (text + i, length - i, tz))
+        {
+          length = i;
+          break;
+        }
+    }
+
+  /* hh:mm:ss(.sss) */
+  if (length >= 8 && text[2] == ':' && text[5] == ':')
+    {
+      return get_iso8601_int (text, 2, hour) &&
+             get_iso8601_int (text + 3, 2, minute) &&
+             get_iso8601_seconds (text + 6, length - 6, seconds);
+    }
+  /* hhmmss(.sss) */
+  else if (length >= 6)
+    {
+      return get_iso8601_int (text, 2, hour) &&
+             get_iso8601_int (text + 2, 2, minute) &&
+             get_iso8601_seconds (text + 4, length - 4, seconds);
+    }
+  else
+    return FALSE;
+}
+
+/**
+ * g_date_time_new_from_iso8601:
+ * @text: an ISO 8601 formatted time string.
+ *
+ * Creates a #GDateTime corresponding to the given ISO 8601 formatted string
+ * @text. Only the following subset of ISO8601 is supported:
+ *
+ * <date>T<time> or <date>t<time> or <date> <time>
+ *
+ * <date> is in the form:
+ * YYYY-MM-DD - Year/month/day, e.g. 2016-08-24.
+ * YYYYMMDD   - Same as above without dividers.
+ * YYYY-DDD   - Ordinal day where DDD is from 001 to 366, e.g. 2016-237.
+ * YYYYDDD    - Same as above without dividers.
+ * YYYY-Www-D - Week day where ww is from 01 to 52 and D from 1-7, e.g.
+                2016-W34-3.
+ * YYYYWwwD   - Same as above without dividers.
+ *
+ * <time> is in the form:
+ * hh:mm:ss(.sss) - Hours, minutes, seconds (subseconds), e.g. 22:10:42.123.
+ * hhmmss(.sss)   - Same as above without dividers.
+ *
+ * Time can a timezone suffix in the form:
+ * Z                - UTC.
+ * +hh:mm or -hh:mm - Offset from UTC in hours and minutes, e.g. +12:00.
+ * +hh or -hh       - Offset from UTC in hours, e.g. +12.
+ *
+ * This call can fail (returning %NULL) if @text is not a valid ISO 8601
+ * formatted string.
+ *
+ * You should release the return value by calling g_date_time_unref()
+ * when you are done with it.
+ *
+ * Returns: a new #GDateTime, or %NULL
+ *
+ * Since: 2.50
+ **/
+GDateTime *
+g_date_time_new_from_iso8601 (const gchar *text)
+{
+  gint length, date_length = -1;
+  gint year = 0, month = 0, day = 0, offset = 0, hour = 0, minute = 0;
+  gdouble seconds = 0.0;
+  GTimeZone *tz = NULL;
+  GDateTime *datetime = NULL;
+
+  g_return_val_if_fail (text != NULL, NULL);
+
+  /* Date and time is separated by 'T', 't', or ' '*/
+  for (length = 0; text[length] != '\0'; length++)
+    {
+      if (date_length < 0 && (text[length] == 'T' || text[length] == 't' || text[length] == ' '))
+        date_length = length;
+    }
+
+  if (date_length < 0)
+    return NULL;
+
+  if (!parse_iso8601_date (text, date_length, &year, &month, &day, &offset) ||
+      !parse_iso8601_time (text + date_length + 1, length - (date_length + 1),
+                           &hour, &minute, &seconds, &tz))
+    goto out;
+
+  if (tz == NULL)
+    tz = g_time_zone_new_local ();
+  datetime = g_date_time_new (tz, year, month, day, hour, minute, seconds);
+  if (datetime != NULL && offset != 0)
+    datetime->days += offset;
+
+out:
+    if (tz != NULL)
+      g_time_zone_unref (tz);
+    return datetime;
 }
 
 /* full new functions {{{1 */

@@ -120,6 +120,9 @@ GDateTime *             g_date_time_new_from_timeval_local              (const G
 GLIB_AVAILABLE_IN_ALL
 GDateTime *             g_date_time_new_from_timeval_utc                (const GTimeVal *tv);
 
+GLIB_AVAILABLE_IN_2_50
+GDateTime *             g_date_time_new_from_iso8601                    (const gchar         *text);
+
 GLIB_AVAILABLE_IN_ALL
 GDateTime *             g_date_time_new                                 (GTimeZone      *tz,
                                                                          gint            year,

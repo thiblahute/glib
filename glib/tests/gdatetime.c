@@ -380,6 +380,224 @@ test_GDateTime_new_from_timeval_utc (void)
 }
 
 static void
+test_GDateTime_new_from_iso8601 (void)
+{
+  GDateTime *dt;
+
+  /* Need non-empty string */
+  dt = g_date_time_new_from_iso8601 ("");
+  g_assert (dt == NULL);
+
+  /* Needs to be correctly formatted */
+  dt = g_date_time_new_from_iso8601 ("not a date");
+  g_assert (dt == NULL);
+
+  /* Check common case */
+  dt = g_date_time_new_from_iso8601 ("2016-08-24T22:10:42");
+  ASSERT_DATE (dt, 2016, 8, 24);
+  ASSERT_TIME (dt, 22, 10, 42);
+  g_date_time_unref (dt);
+
+  /* Can't have whitespace */
+  dt = g_date_time_new_from_iso8601 ("2016 08 24T22:10:42");
+  g_assert (dt == NULL);
+  dt = g_date_time_new_from_iso8601 ("2016-08-24T22:10:42 ");
+  g_assert (dt == NULL);
+  dt = g_date_time_new_from_iso8601 (" 2016-08-24T22:10:42");
+  g_assert (dt == NULL);
+
+  /* Check lowercase time separator or space allowed */
+  dt = g_date_time_new_from_iso8601 ("2016-08-24t22:10:42");
+  ASSERT_DATE (dt, 2016, 8, 24);
+  ASSERT_TIME (dt, 22, 10, 42);
+  g_date_time_unref (dt);
+  dt = g_date_time_new_from_iso8601 ("2016-08-24 22:10:42");
+  ASSERT_DATE (dt, 2016, 8, 24);
+  ASSERT_TIME (dt, 22, 10, 42);
+  g_date_time_unref (dt);
+
+  /* Check dates without separators allowed */
+  dt = g_date_time_new_from_iso8601 ("20160824T22:10:42");
+  ASSERT_DATE (dt, 2016, 8, 24);
+  ASSERT_TIME (dt, 22, 10, 42);
+  g_date_time_unref (dt);
+
+  /* Months are two digits */
+  dt = g_date_time_new_from_iso8601 ("2016-1-01T22:10:42");
+  g_assert (dt == NULL);
+
+  /* Days are two digits */
+  dt = g_date_time_new_from_iso8601 ("2016-01-1T22:10:42");
+  g_assert (dt == NULL);
+
+  /* Need consistent usage of separators */
+  dt = g_date_time_new_from_iso8601 ("2016-0824T22:10:42");
+  g_assert (dt == NULL);
+  dt = g_date_time_new_from_iso8601 ("201608-24T22:10:42");
+  g_assert (dt == NULL);
+
+  /* Check month within valid range */
+  dt = g_date_time_new_from_iso8601 ("2016-00-13T22:10:42");
+  g_assert (dt == NULL);
+  dt = g_date_time_new_from_iso8601 ("2016-13-13T22:10:42");
+  g_assert (dt == NULL);
+
+  /* Check day within valid range */
+  dt = g_date_time_new_from_iso8601 ("2016-01-00T22:10:42");
+  g_assert (dt == NULL);
+  dt = g_date_time_new_from_iso8601 ("2016-01-32T22:10:42");
+  g_assert (dt == NULL);
+
+  /* Check ordinal days work */
+  dt = g_date_time_new_from_iso8601 ("2016-237T22:10:42");
+  ASSERT_DATE (dt, 2016, 8, 24);
+  ASSERT_TIME (dt, 22, 10, 42);
+  g_date_time_unref (dt);
+  dt = g_date_time_new_from_iso8601 ("2016237T22:10:42");
+  ASSERT_DATE (dt, 2016, 8, 24);
+  ASSERT_TIME (dt, 22, 10, 42);
+  g_date_time_unref (dt);
+
+  /* Check ordinal leap days */
+  dt = g_date_time_new_from_iso8601 ("2016-366T22:10:42");
+  ASSERT_DATE (dt, 2016, 12, 31);
+  ASSERT_TIME (dt, 22, 10, 42);
+  g_date_time_unref (dt);
+  dt = g_date_time_new_from_iso8601 ("2017-365T22:10:42");
+  ASSERT_DATE (dt, 2017, 12, 31);
+  ASSERT_TIME (dt, 22, 10, 42);
+  g_date_time_unref (dt);
+  dt = g_date_time_new_from_iso8601 ("2017-366T22:10:42");
+  g_assert (dt == NULL);
+
+  /* Days start at 1 */
+  dt = g_date_time_new_from_iso8601 ("2016-000T22:10:42");
+  g_assert (dt == NULL);
+
+  /* Limited to number of days in the year (2016 is a leap year) */
+  dt = g_date_time_new_from_iso8601 ("2016-367T22:10:42");
+  g_assert (dt == NULL);
+
+  /* Days are two digits */
+  dt = g_date_time_new_from_iso8601 ("2016-1T22:10:42");
+  g_assert (dt == NULL);
+  dt = g_date_time_new_from_iso8601 ("2016-12T22:10:42");
+  g_assert (dt == NULL);
+
+  /* Check week days work */
+  dt = g_date_time_new_from_iso8601 ("2016-W34-3T22:10:42");
+  ASSERT_DATE (dt, 2016, 8, 24);
+  ASSERT_TIME (dt, 22, 10, 42);
+  g_date_time_unref (dt);
+  dt = g_date_time_new_from_iso8601 ("2016W343T22:10:42");
+  ASSERT_DATE (dt, 2016, 8, 24);
+  ASSERT_TIME (dt, 22, 10, 42);
+  g_date_time_unref (dt);
+
+  /* We don't support weeks without weekdays (valid ISO 8601) */
+  dt = g_date_time_new_from_iso8601 ("2016-W34T22:10:42");
+  g_assert (dt == NULL);
+  dt = g_date_time_new_from_iso8601 ("2016W34T22:10:42");
+  g_assert (dt == NULL);
+
+  /* Weeks are two digits */
+  dt = g_date_time_new_from_iso8601 ("2016-W3-1T22:10:42");
+  g_assert (dt == NULL);
+
+  /* Weeks start at 1 */
+  dt = g_date_time_new_from_iso8601 ("2016-W00-1T22:10:42");
+  g_assert (dt == NULL);
+
+  /* Limited to number of weeks in the year */
+  dt = g_date_time_new_from_iso8601 ("2016-W53-1T22:10:42");
+  g_assert (dt == NULL);
+
+  /* Limited to number of days in the week */
+  dt = g_date_time_new_from_iso8601 ("2016-W34-0T22:10:42");
+  g_assert (dt == NULL);
+  dt = g_date_time_new_from_iso8601 ("2016-W34-8T22:10:42");
+  g_assert (dt == NULL);
+
+  /* Days are one digit */
+  dt = g_date_time_new_from_iso8601 ("2016-W34-99T22:10:42");
+  g_assert (dt == NULL);
+
+  /* Check week day changes depending on year */
+  dt = g_date_time_new_from_iso8601 ("2017-W34-1T22:10:42");
+  ASSERT_DATE (dt, 2017, 8, 21);
+  g_date_time_unref (dt);
+
+  /* Check week day changes depending on leap years */
+  dt = g_date_time_new_from_iso8601 ("1900-W01-1T22:10:42");
+  ASSERT_DATE (dt, 1900, 1, 1);
+  g_date_time_unref (dt);
+
+  /* YYYY-MM not allowed (NOT valid ISO 8601) */
+  dt = g_date_time_new_from_iso8601 ("2016-08T22:10:42");
+  g_assert (dt == NULL);
+
+  /* We don't support omitted year (valid ISO 8601) */
+  dt = g_date_time_new_from_iso8601 ("--08-24T22:10:42");
+  g_assert (dt == NULL);
+  dt = g_date_time_new_from_iso8601 ("--0824T22:10:42");
+  g_assert (dt == NULL);
+
+  /* Check subseconds work */
+  dt = g_date_time_new_from_iso8601 ("2016-08-24T22:10:42.123456");
+  ASSERT_DATE (dt, 2016, 8, 24);
+  ASSERT_TIME (dt, 22, 10, 42.123456);
+  g_date_time_unref (dt);
+
+  /* Check time separators optional */
+  dt = g_date_time_new_from_iso8601 ("2016-08-24T221042.123456");
+  ASSERT_DATE (dt, 2016, 8, 24);
+  ASSERT_TIME (dt, 22, 10, 42.123456);
+  g_date_time_unref (dt);
+
+  /* We don't support times without minutes / seconds (valid ISO 8601) */
+  dt = g_date_time_new_from_iso8601 ("2016-08-24T22");
+  g_assert (dt == NULL);
+  dt = g_date_time_new_from_iso8601 ("2016-08-24T22:10");
+  g_assert (dt == NULL);
+  dt = g_date_time_new_from_iso8601 ("2016-08-24T2210");
+  g_assert (dt == NULL);
+
+  /* UTC time uses 'Z' */
+  dt = g_date_time_new_from_iso8601 ("2016-08-24T22:10:42Z");
+  ASSERT_DATE (dt, 2016, 8, 24);
+  ASSERT_TIME (dt, 22, 10, 42);
+  g_assert_cmpint (g_date_time_get_utc_offset (dt), ==, 0);
+  g_date_time_unref (dt);
+
+  /* Check timezone works */
+  dt = g_date_time_new_from_iso8601 ("2016-08-24T22:10:42+12:00");
+  ASSERT_DATE (dt, 2016, 8, 24);
+  ASSERT_TIME (dt, 22, 10, 42);
+  g_assert_cmpint (g_date_time_get_utc_offset (dt), ==, 12 * G_TIME_SPAN_HOUR);
+  g_date_time_unref (dt);
+  dt = g_date_time_new_from_iso8601 ("2016-08-24T22:10:42+12");
+  ASSERT_DATE (dt, 2016, 8, 24);
+  ASSERT_TIME (dt, 22, 10, 42);
+  g_assert_cmpint (g_date_time_get_utc_offset (dt), ==, 12 * G_TIME_SPAN_HOUR);
+  g_date_time_unref (dt);
+  dt = g_date_time_new_from_iso8601 ("2016-08-24T22:10:42-02");
+  ASSERT_DATE (dt, 2016, 8, 24);
+  ASSERT_TIME (dt, 22, 10, 42);
+  g_assert_cmpint (g_date_time_get_utc_offset (dt), ==, -2 * G_TIME_SPAN_HOUR);
+  g_date_time_unref (dt);
+
+  /* Timezone seconds not allowed */
+  dt = g_date_time_new_from_iso8601 ("2016-08-24T22-12:00:00");
+  g_assert (dt == NULL);
+  dt = g_date_time_new_from_iso8601 ("2016-08-24T22-12:00:00.000");
+  g_assert (dt == NULL);
+
+  /* Timezone hours two digits */
+  dt = g_date_time_new_from_iso8601 ("2016-08-24T22-2");
+  g_assert (dt == NULL);
+}
+
+static void
 test_GDateTime_to_unix (void)
 {
   GDateTime *dt;
@@ -1655,6 +1873,7 @@ main (gint   argc,
   g_test_add_func ("/GDateTime/new_from_unix_utc", test_GDateTime_new_from_unix_utc);
   g_test_add_func ("/GDateTime/new_from_timeval", test_GDateTime_new_from_timeval);
   g_test_add_func ("/GDateTime/new_from_timeval_utc", test_GDateTime_new_from_timeval_utc);
+  g_test_add_func ("/GDateTime/new_from_iso8601", test_GDateTime_new_from_iso8601);
   g_test_add_func ("/GDateTime/new_full", test_GDateTime_new_full);
   g_test_add_func ("/GDateTime/now", test_GDateTime_now);
   g_test_add_func ("/GDateTime/printf", test_GDateTime_printf);
