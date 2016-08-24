@@ -222,6 +222,12 @@ test_GDateTime_equal (void)
   g_assert (g_date_time_equal (dt1, dt2));
   g_date_time_unref (dt1);
   g_date_time_unref (dt2);
+
+  /* Check Unicode minus character */
+  tz = g_time_zone_new ("−03:00");
+  dt1 = g_date_time_new (tz, 2010, 5, 24,  8, 0, 0);
+  g_time_zone_unref (tz);
+  g_assert_cmpint (g_date_time_get_utc_offset (dt1) / G_USEC_PER_SEC, ==, (-3 * 3600));
 }
 
 static void

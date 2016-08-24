@@ -14,7 +14,8 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  *
- * Author: Ryan Lortie <desrt@desrt.ca>
+ * Authors: Ryan Lortie <desrt@desrt.ca>
+ *          Robert Ancell <robert.ancell@canonical.com>
  */
 
 /* Prologue {{{1 */
@@ -337,6 +338,13 @@ parse_time (const gchar *time_,
   return *time_ == '\0';
 }
 
+/* Check if text has Unicode minus symbol prefix (−) */
+static gboolean
+has_minus_prefix (const gchar *text)
+{
+    return (guint8) text[0] == 0xe2 && (guint8) text[1] == 0x88 && (guint8) text[2] == 0x92;
+}
+
 static gboolean
 parse_constant_offset (const gchar *name,
                        gint32      *offset)
@@ -347,28 +355,37 @@ parse_constant_offset (const gchar *name,
       return TRUE;
     }
 
-  if (*name >= '0' && '9' >= *name)
+  if (name[0] >= '0' && '9' >= name[0])
     return parse_time (name, offset);
 
-  switch (*name++)
+  if (name[0] == 'Z')
     {
-    case 'Z':
       *offset = 0;
-      return !*name;
+      return name[1] == '\0';
+    }
 
-    case '+':
-      return parse_time (name, offset);
+  else if (name[0] == '+')
+    return parse_time (name + 1, offset);
 
-    case '-':
-      if (parse_time (name, offset))
+  else if (name[0] == '-')
+    {
+      if (parse_time (name + 1, offset))
         {
           *offset = -*offset;
           return TRUE;
         }
-
-    default:
-      return FALSE;
     }
+
+  else if (has_minus_prefix (name))
+    {
+      if (parse_time (name + 3, offset))
+        {
+          *offset = -*offset;
+          return TRUE;
+        }
+    }
+
+  return FALSE;
 }
 
 static void
