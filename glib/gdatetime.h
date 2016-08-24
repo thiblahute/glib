@@ -98,6 +98,41 @@ typedef gint64 GTimeSpan;
  */
 typedef struct _GDateTime GDateTime;
 
+/**
+ * GDateTimeParseFlags:
+ * @G_DATE_TIME_PARSE_YEAR: the parsed date includes the year.
+ * @G_DATE_TIME_PARSE_MONTH: the parsed date includes the month.
+ * @G_DATE_TIME_PARSE_DAY: the parsed date includes the day.
+ * @G_DATE_TIME_PARSE_WEEK: the parsed date is calculated from the week number.
+ * @G_DATE_TIME_PARSE_WEEK_DAY: the parsed date is calculated from the week.
+ *     number and day of the week. (Implies G_DATE_TIME_PARSE_WEEK).
+ * @G_DATE_TIME_PARSE_ORDINAL_DAY: the parsed date is calculated from the
+       ordinal day (i.e. 1-365/366).
+ * @G_DATE_TIME_PARSE_HOUR: the parsed date includes the hour.
+ * @G_DATE_TIME_PARSE_MINUTE: the parsed date includes the minute.
+ * @G_DATE_TIME_PARSE_SECOND: the parsed date includes the second.
+ * @G_DATE_TIME_PARSE_SUBSECOND: the parsed date includes the subsecond.
+ * @G_DATE_TIME_PARSE_TIMEZONE: the parsed date includes a timezone.
+ *
+ * Flags used in g_date_time_new_from_iso8601 () and
+ * g_date_time_new_from_iso8601_with_date () to indicate what fields were
+ * parsed from the ISO 8601 string.
+ */
+typedef enum
+{
+    G_DATE_TIME_PARSE_YEAR        = 1 << 0,
+    G_DATE_TIME_PARSE_MONTH       = 1 << 1,
+    G_DATE_TIME_PARSE_DAY         = 1 << 2,
+    G_DATE_TIME_PARSE_WEEK        = 1 << 3,
+    G_DATE_TIME_PARSE_WEEK_DAY    = 1 << 4,
+    G_DATE_TIME_PARSE_ORDINAL_DAY = 1 << 5,
+    G_DATE_TIME_PARSE_HOUR        = 1 << 6,
+    G_DATE_TIME_PARSE_MINUTE      = 1 << 7,
+    G_DATE_TIME_PARSE_SECOND      = 1 << 8,
+    G_DATE_TIME_PARSE_SUBSECOND   = 1 << 9,
+    G_DATE_TIME_PARSE_TIMEZONE    = 1 << 10
+} GDateTimeParseFlags;
+
 GLIB_AVAILABLE_IN_ALL
 void                    g_date_time_unref                               (GDateTime      *datetime);
 GLIB_AVAILABLE_IN_ALL
@@ -119,6 +154,16 @@ GLIB_AVAILABLE_IN_ALL
 GDateTime *             g_date_time_new_from_timeval_local              (const GTimeVal *tv);
 GLIB_AVAILABLE_IN_ALL
 GDateTime *             g_date_time_new_from_timeval_utc                (const GTimeVal *tv);
+
+GLIB_AVAILABLE_IN_2_50
+GDateTime *             g_date_time_new_from_iso8601                    (const gchar         *text,
+                                                                         GDateTimeParseFlags *flags);
+GLIB_AVAILABLE_IN_2_50
+GDateTime *             g_date_time_new_from_iso8601_with_date          (const gchar         *text,
+                                                                         gint                 year,
+                                                                         gint                 month,
+                                                                         gint                 day,
+                                                                         GDateTimeParseFlags *flags);
 
 GLIB_AVAILABLE_IN_ALL
 GDateTime *             g_date_time_new                                 (GTimeZone      *tz,

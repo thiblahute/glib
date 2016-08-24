@@ -386,6 +386,319 @@ test_GDateTime_new_from_timeval_utc (void)
 }
 
 static void
+test_GDateTime_new_from_iso8601 (void)
+{
+  GDateTime *dt;
+  GDateTimeParseFlags flags;
+
+  /* Need non-empty string */
+  dt = g_date_time_new_from_iso8601 ("", NULL);
+  g_assert (dt == NULL);
+
+  /* Needs to be correctly formatted */
+  dt = g_date_time_new_from_iso8601 ("not a date", NULL);
+  g_assert (dt == NULL);
+
+  /* Can't have whitespace */
+  dt = g_date_time_new_from_iso8601 ("2016 08 24", &flags);
+  g_assert (dt == NULL);
+  dt = g_date_time_new_from_iso8601 ("2016-08-24 ", &flags);
+  g_assert (dt == NULL);
+  dt = g_date_time_new_from_iso8601 (" 2016-08-24", &flags);
+  g_assert (dt == NULL);
+
+  dt = g_date_time_new_from_iso8601 ("2016-08-24", &flags);
+  ASSERT_DATE (dt, 2016, 8, 24);
+  ASSERT_TIME (dt, 0, 0, 0);
+  g_assert_cmpint (flags, ==, G_DATE_TIME_PARSE_YEAR | G_DATE_TIME_PARSE_MONTH | G_DATE_TIME_PARSE_DAY);
+  g_date_time_unref (dt);
+
+  dt = g_date_time_new_from_iso8601 ("20160824", &flags);
+  ASSERT_DATE (dt, 2016, 8, 24);
+  ASSERT_TIME (dt, 0, 0, 0);
+  g_assert_cmpint (flags, ==, G_DATE_TIME_PARSE_YEAR | G_DATE_TIME_PARSE_MONTH | G_DATE_TIME_PARSE_DAY);
+  g_date_time_unref (dt);
+
+  /* Months are two digits */
+  dt = g_date_time_new_from_iso8601 ("2016-1-01", NULL);
+  g_assert (dt == NULL);
+
+  /* Days are two digits */
+  dt = g_date_time_new_from_iso8601 ("2016-01-1", NULL);
+  g_assert (dt == NULL);
+
+  /* Need consistent usage of separators */
+  dt = g_date_time_new_from_iso8601 ("2016-0824", NULL);
+  g_assert (dt == NULL);
+  dt = g_date_time_new_from_iso8601 ("201608-24", NULL);
+  g_assert (dt == NULL);
+
+  /* Check month within valid range */
+  dt = g_date_time_new_from_iso8601 ("2016-00-13", NULL);
+  g_assert (dt == NULL);
+  dt = g_date_time_new_from_iso8601 ("2016-13-13", NULL);
+  g_assert (dt == NULL);
+
+  /* Check day within valid range */
+  dt = g_date_time_new_from_iso8601 ("2016-01-00", NULL);
+  g_assert (dt == NULL);
+  dt = g_date_time_new_from_iso8601 ("2016-01-32", NULL);
+  g_assert (dt == NULL);
+
+  dt = g_date_time_new_from_iso8601 ("2016-237", &flags);
+  ASSERT_DATE (dt, 2016, 8, 24);
+  ASSERT_TIME (dt, 0, 0, 0);
+  g_assert_cmpint (flags, ==, G_DATE_TIME_PARSE_YEAR | G_DATE_TIME_PARSE_ORDINAL_DAY);
+  g_date_time_unref (dt);
+
+  dt = g_date_time_new_from_iso8601 ("2016237", &flags);
+  ASSERT_DATE (dt, 2016, 8, 24);
+  ASSERT_TIME (dt, 0, 0, 0);
+  g_assert_cmpint (flags, ==, G_DATE_TIME_PARSE_YEAR | G_DATE_TIME_PARSE_ORDINAL_DAY);
+  g_date_time_unref (dt);
+
+  /* Days start at 1 */
+  dt = g_date_time_new_from_iso8601 ("2016-000", NULL);
+  g_assert (dt == NULL);
+
+  /* Limited to number of days in the year (2016 is a leap year) */
+  dt = g_date_time_new_from_iso8601 ("2016-367", NULL);
+  g_assert (dt == NULL);
+
+  /* Days are two digits */
+  dt = g_date_time_new_from_iso8601 ("2016-1", NULL);
+  g_assert (dt == NULL);
+  dt = g_date_time_new_from_iso8601 ("2016-12", NULL);
+  g_assert (dt == NULL);
+
+  dt = g_date_time_new_from_iso8601 ("2016-W34", &flags);
+  ASSERT_DATE (dt, 2016, 8, 22);
+  ASSERT_TIME (dt, 0, 0, 0);
+  g_assert_cmpint (flags, ==, G_DATE_TIME_PARSE_YEAR | G_DATE_TIME_PARSE_WEEK);
+  g_date_time_unref (dt);
+
+  dt = g_date_time_new_from_iso8601 ("2016W34", &flags);
+  ASSERT_DATE (dt, 2016, 8, 22);
+  ASSERT_TIME (dt, 0, 0, 0);
+  g_assert_cmpint (flags, ==, G_DATE_TIME_PARSE_YEAR | G_DATE_TIME_PARSE_WEEK);
+  g_date_time_unref (dt);
+
+  /* Weeks are two digits */
+  dt = g_date_time_new_from_iso8601 ("2016-W3", NULL);
+  g_assert (dt == NULL);
+
+  /* Weeks start at 1 */
+  dt = g_date_time_new_from_iso8601 ("2016-W00", NULL);
+  g_assert (dt == NULL);
+
+  /* Limited to number of weeks in the year */
+  dt = g_date_time_new_from_iso8601 ("2016-W53", NULL);
+  g_assert (dt == NULL);
+
+  /* Check week day changes depending on year */
+  dt = g_date_time_new_from_iso8601 ("2017W34", &flags);
+  ASSERT_DATE (dt, 2017, 8, 21);
+  ASSERT_TIME (dt, 0, 0, 0);
+  g_assert_cmpint (flags, ==, G_DATE_TIME_PARSE_YEAR | G_DATE_TIME_PARSE_WEEK);
+  g_date_time_unref (dt);
+
+  /* Check week day changes depending on leap years */
+  dt = g_date_time_new_from_iso8601 ("1900W01", &flags);
+  ASSERT_DATE (dt, 1900, 1, 1);
+  ASSERT_TIME (dt, 0, 0, 0);
+  g_assert_cmpint (flags, ==, G_DATE_TIME_PARSE_YEAR | G_DATE_TIME_PARSE_WEEK);
+  g_date_time_unref (dt);
+
+  dt = g_date_time_new_from_iso8601 ("2016-W34-3", &flags);
+  ASSERT_DATE (dt, 2016, 8, 24);
+  ASSERT_TIME (dt, 0, 0, 0);
+  g_assert_cmpint (flags, ==, G_DATE_TIME_PARSE_YEAR | G_DATE_TIME_PARSE_WEEK | G_DATE_TIME_PARSE_WEEK_DAY);
+  g_date_time_unref (dt);
+
+  dt = g_date_time_new_from_iso8601 ("2016W343", &flags);
+  ASSERT_DATE (dt, 2016, 8, 24);
+  ASSERT_TIME (dt, 0, 0, 0);
+  g_assert_cmpint (flags, ==, G_DATE_TIME_PARSE_YEAR | G_DATE_TIME_PARSE_WEEK | G_DATE_TIME_PARSE_WEEK_DAY);
+  g_date_time_unref (dt);
+
+  /* Limited to number of days in the week */
+  dt = g_date_time_new_from_iso8601 ("2016-W34-0", NULL);
+  g_assert (dt == NULL);
+  dt = g_date_time_new_from_iso8601 ("2016-W34-8", NULL);
+  g_assert (dt == NULL);
+
+  /* Days are one digit */
+  dt = g_date_time_new_from_iso8601 ("2016-W34-99", NULL);
+  g_assert (dt == NULL);
+
+  /* YYYY-MM not allowed */
+  dt = g_date_time_new_from_iso8601 ("2016-08", NULL);
+  g_assert (dt == NULL);
+
+  dt = g_date_time_new_from_iso8601_with_date ("--08-24", 2016, 0, 0, &flags);
+  ASSERT_DATE (dt, 2016, 8, 24);
+  ASSERT_TIME (dt, 0, 0, 0);
+  g_assert_cmpint (flags, ==, G_DATE_TIME_PARSE_MONTH | G_DATE_TIME_PARSE_DAY);
+  g_date_time_unref (dt);
+
+  dt = g_date_time_new_from_iso8601_with_date ("--0824", 2016, 0, 0, &flags);
+  ASSERT_DATE (dt, 2016, 8, 24);
+  ASSERT_TIME (dt, 0, 0, 0);
+  g_assert_cmpint (flags, ==, G_DATE_TIME_PARSE_MONTH | G_DATE_TIME_PARSE_DAY);
+  g_date_time_unref (dt);
+
+  dt = g_date_time_new_from_iso8601_with_date ("22", 2016, 8, 24, &flags);
+  ASSERT_DATE (dt, 2016, 8, 24);
+  ASSERT_TIME (dt, 22, 0, 0);
+  g_assert_cmpint (flags, ==, G_DATE_TIME_PARSE_HOUR);
+  g_date_time_unref (dt);
+
+  dt = g_date_time_new_from_iso8601_with_date ("22:10", 2016, 8, 24, &flags);
+  ASSERT_DATE (dt, 2016, 8, 24);
+  ASSERT_TIME (dt, 22, 10, 0);
+  g_assert_cmpint (flags, ==, G_DATE_TIME_PARSE_HOUR | G_DATE_TIME_PARSE_MINUTE);
+  g_date_time_unref (dt);
+
+  dt = g_date_time_new_from_iso8601_with_date ("22:10:42", 2016, 8, 24, &flags);
+  ASSERT_DATE (dt, 2016, 8, 24);
+  ASSERT_TIME (dt, 22, 10, 42);
+  g_assert_cmpint (flags, ==, G_DATE_TIME_PARSE_HOUR | G_DATE_TIME_PARSE_MINUTE | G_DATE_TIME_PARSE_SECOND);
+  g_date_time_unref (dt);
+
+  dt = g_date_time_new_from_iso8601_with_date ("22:10:42.123456", 2016, 8, 24, &flags);
+  ASSERT_DATE (dt, 2016, 8, 24);
+  ASSERT_TIME (dt, 22, 10, 42.123456);
+  g_assert_cmpint (flags, ==, G_DATE_TIME_PARSE_HOUR | G_DATE_TIME_PARSE_MINUTE | G_DATE_TIME_PARSE_SECOND | G_DATE_TIME_PARSE_SUBSECOND);
+  g_date_time_unref (dt);
+
+  dt = g_date_time_new_from_iso8601_with_date ("2210", 2016, 8, 24, &flags);
+  ASSERT_DATE (dt, 2016, 8, 24);
+  ASSERT_TIME (dt, 22, 10, 0);
+  g_assert_cmpint (flags, ==, G_DATE_TIME_PARSE_HOUR | G_DATE_TIME_PARSE_MINUTE);
+  g_date_time_unref (dt);
+
+  dt = g_date_time_new_from_iso8601_with_date ("221042", 2016, 8, 24, &flags);
+  ASSERT_DATE (dt, 2016, 8, 24);
+  ASSERT_TIME (dt, 22, 10, 42);
+  g_assert_cmpint (flags, ==, G_DATE_TIME_PARSE_HOUR | G_DATE_TIME_PARSE_MINUTE | G_DATE_TIME_PARSE_SECOND);
+  g_date_time_unref (dt);
+
+  dt = g_date_time_new_from_iso8601_with_date ("221042.123456", 2016, 8, 24, &flags);
+  ASSERT_DATE (dt, 2016, 8, 24);
+  ASSERT_TIME (dt, 22, 10, 42.123456);
+  g_assert_cmpint (flags, ==, G_DATE_TIME_PARSE_HOUR | G_DATE_TIME_PARSE_MINUTE | G_DATE_TIME_PARSE_SECOND | G_DATE_TIME_PARSE_SUBSECOND);
+  g_date_time_unref (dt);
+
+  dt = g_date_time_new_from_iso8601 ("2016-08-24T22", &flags);
+  ASSERT_DATE (dt, 2016, 8, 24);
+  ASSERT_TIME (dt, 22, 0, 0);
+  g_assert_cmpint (flags, ==, G_DATE_TIME_PARSE_YEAR | G_DATE_TIME_PARSE_MONTH | G_DATE_TIME_PARSE_DAY |
+                   G_DATE_TIME_PARSE_HOUR);
+  g_date_time_unref (dt);
+
+  dt = g_date_time_new_from_iso8601 ("2016-08-24T22:10", &flags);
+  ASSERT_DATE (dt, 2016, 8, 24);
+  ASSERT_TIME (dt, 22, 10, 0);
+  g_assert_cmpint (flags, ==, G_DATE_TIME_PARSE_YEAR | G_DATE_TIME_PARSE_MONTH | G_DATE_TIME_PARSE_DAY |
+                   G_DATE_TIME_PARSE_HOUR | G_DATE_TIME_PARSE_MINUTE);
+  g_date_time_unref (dt);
+
+  dt = g_date_time_new_from_iso8601 ("2016-08-24T22:10:42", &flags);
+  ASSERT_DATE (dt, 2016, 8, 24);
+  ASSERT_TIME (dt, 22, 10, 42);
+  g_assert_cmpint (flags, ==, G_DATE_TIME_PARSE_YEAR | G_DATE_TIME_PARSE_MONTH | G_DATE_TIME_PARSE_DAY |
+                   G_DATE_TIME_PARSE_HOUR | G_DATE_TIME_PARSE_MINUTE | G_DATE_TIME_PARSE_SECOND);
+  g_date_time_unref (dt);
+
+  dt = g_date_time_new_from_iso8601 ("2016-08-24T22:10:42.123456", &flags);
+  ASSERT_DATE (dt, 2016, 8, 24);
+  ASSERT_TIME (dt, 22, 10, 42.123456);
+  g_assert_cmpint (flags, ==, G_DATE_TIME_PARSE_YEAR | G_DATE_TIME_PARSE_MONTH | G_DATE_TIME_PARSE_DAY |
+                   G_DATE_TIME_PARSE_HOUR | G_DATE_TIME_PARSE_MINUTE | G_DATE_TIME_PARSE_SECOND | G_DATE_TIME_PARSE_SUBSECOND);
+  g_date_time_unref (dt);
+
+  dt = g_date_time_new_from_iso8601 ("2016-08-24T2210", &flags);
+  ASSERT_DATE (dt, 2016, 8, 24);
+  ASSERT_TIME (dt, 22, 10, 0);
+  g_assert_cmpint (flags, ==, G_DATE_TIME_PARSE_YEAR | G_DATE_TIME_PARSE_MONTH | G_DATE_TIME_PARSE_DAY |
+                   G_DATE_TIME_PARSE_HOUR | G_DATE_TIME_PARSE_MINUTE);
+  g_date_time_unref (dt);
+
+  dt = g_date_time_new_from_iso8601 ("2016-08-24T221042", &flags);
+  ASSERT_DATE (dt, 2016, 8, 24);
+  ASSERT_TIME (dt, 22, 10, 42);
+  g_assert_cmpint (flags, ==, G_DATE_TIME_PARSE_YEAR | G_DATE_TIME_PARSE_MONTH | G_DATE_TIME_PARSE_DAY |
+                   G_DATE_TIME_PARSE_HOUR | G_DATE_TIME_PARSE_MINUTE | G_DATE_TIME_PARSE_SECOND);
+  g_date_time_unref (dt);
+
+  dt = g_date_time_new_from_iso8601 ("2016-08-24T221042.123456", &flags);
+  ASSERT_DATE (dt, 2016, 8, 24);
+  ASSERT_TIME (dt, 22, 10, 42.123456);
+  g_assert_cmpint (flags, ==, G_DATE_TIME_PARSE_YEAR | G_DATE_TIME_PARSE_MONTH | G_DATE_TIME_PARSE_DAY |
+                   G_DATE_TIME_PARSE_HOUR | G_DATE_TIME_PARSE_MINUTE | G_DATE_TIME_PARSE_SECOND | G_DATE_TIME_PARSE_SUBSECOND);
+  g_date_time_unref (dt);
+
+  /* UTC time uses 'Z' */
+  dt = g_date_time_new_from_iso8601 ("2016-08-24T22Z", &flags);
+  ASSERT_DATE (dt, 2016, 8, 24);
+  ASSERT_TIME (dt, 22, 0, 0);
+  g_assert_cmpint (g_date_time_get_utc_offset (dt), ==, 0);
+  g_assert_cmpint (flags, ==, G_DATE_TIME_PARSE_YEAR | G_DATE_TIME_PARSE_MONTH | G_DATE_TIME_PARSE_DAY |
+                   G_DATE_TIME_PARSE_HOUR | G_DATE_TIME_PARSE_TIMEZONE);
+  g_date_time_unref (dt);
+
+  dt = g_date_time_new_from_iso8601 ("2016-08-24T22+12:00", &flags);
+  ASSERT_DATE (dt, 2016, 8, 24);
+  ASSERT_TIME (dt, 22, 0, 0);
+  g_assert_cmpint (g_date_time_get_utc_offset (dt), ==, 12 * G_TIME_SPAN_HOUR);
+  g_assert_cmpint (flags, ==, G_DATE_TIME_PARSE_YEAR | G_DATE_TIME_PARSE_MONTH | G_DATE_TIME_PARSE_DAY |
+                   G_DATE_TIME_PARSE_HOUR | G_DATE_TIME_PARSE_TIMEZONE);
+  g_date_time_unref (dt);
+
+  /* Check negative values */
+  dt = g_date_time_new_from_iso8601 ("2016-08-24T22-02", &flags);
+  ASSERT_DATE (dt, 2016, 8, 24);
+  ASSERT_TIME (dt, 22, 0, 0);
+  g_assert_cmpint (g_date_time_get_utc_offset (dt), ==, -2 * G_TIME_SPAN_HOUR);
+  g_assert_cmpint (flags, ==, G_DATE_TIME_PARSE_YEAR | G_DATE_TIME_PARSE_MONTH | G_DATE_TIME_PARSE_DAY |
+                   G_DATE_TIME_PARSE_HOUR | G_DATE_TIME_PARSE_TIMEZONE);
+  g_date_time_unref (dt);
+
+  /* Check negative values using Unicode character − */
+  dt = g_date_time_new_from_iso8601 ("2016-08-24T22−02:00", &flags);
+  ASSERT_DATE (dt, 2016, 8, 24);
+  ASSERT_TIME (dt, 22, 0, 0);
+  g_assert_cmpint (g_date_time_get_utc_offset (dt), ==, -2 * G_TIME_SPAN_HOUR);
+  g_assert_cmpint (flags, ==, G_DATE_TIME_PARSE_YEAR | G_DATE_TIME_PARSE_MONTH | G_DATE_TIME_PARSE_DAY |
+                   G_DATE_TIME_PARSE_HOUR | G_DATE_TIME_PARSE_TIMEZONE);
+  g_date_time_unref (dt);
+  dt = g_date_time_new_from_iso8601 ("2016-08-24T22−0200", &flags);
+  ASSERT_DATE (dt, 2016, 8, 24);
+  ASSERT_TIME (dt, 22, 0, 0);
+  g_assert_cmpint (g_date_time_get_utc_offset (dt), ==, -2 * G_TIME_SPAN_HOUR);
+  g_assert_cmpint (flags, ==, G_DATE_TIME_PARSE_YEAR | G_DATE_TIME_PARSE_MONTH | G_DATE_TIME_PARSE_DAY |
+                   G_DATE_TIME_PARSE_HOUR | G_DATE_TIME_PARSE_TIMEZONE);
+  g_date_time_unref (dt);
+  dt = g_date_time_new_from_iso8601 ("2016-08-24T22−02", &flags);
+  ASSERT_DATE (dt, 2016, 8, 24);
+  ASSERT_TIME (dt, 22, 0, 0);
+  g_assert_cmpint (g_date_time_get_utc_offset (dt), ==, -2 * G_TIME_SPAN_HOUR);
+  g_assert_cmpint (flags, ==, G_DATE_TIME_PARSE_YEAR | G_DATE_TIME_PARSE_MONTH | G_DATE_TIME_PARSE_DAY |
+                   G_DATE_TIME_PARSE_HOUR | G_DATE_TIME_PARSE_TIMEZONE);
+  g_date_time_unref (dt);
+
+  /* Timezone seconds not allowed */
+  dt = g_date_time_new_from_iso8601 ("2016-08-24T22-12:00:00", &flags);
+  g_assert (dt == NULL);
+  dt = g_date_time_new_from_iso8601 ("2016-08-24T22-12:00:00.000", &flags);
+  g_assert (dt == NULL);
+
+  /* Timezone hours two digits */
+  dt = g_date_time_new_from_iso8601 ("2016-08-24T22-2", &flags);
+  g_assert (dt == NULL);
+}
+
+static void
 test_GDateTime_to_unix (void)
 {
   GDateTime *dt;
@@ -1661,6 +1974,7 @@ main (gint   argc,
   g_test_add_func ("/GDateTime/new_from_unix_utc", test_GDateTime_new_from_unix_utc);
   g_test_add_func ("/GDateTime/new_from_timeval", test_GDateTime_new_from_timeval);
   g_test_add_func ("/GDateTime/new_from_timeval_utc", test_GDateTime_new_from_timeval_utc);
+  g_test_add_func ("/GDateTime/new_from_iso8601", test_GDateTime_new_from_iso8601);
   g_test_add_func ("/GDateTime/new_full", test_GDateTime_new_full);
   g_test_add_func ("/GDateTime/now", test_GDateTime_now);
   g_test_add_func ("/GDateTime/printf", test_GDateTime_printf);
