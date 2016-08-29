@@ -589,6 +589,21 @@ test_GDateTime_new_from_iso8601 (void)
   g_assert_cmpint (flags, ==, G_DATE_TIME_PARSE_HOUR | G_DATE_TIME_PARSE_MINUTE | G_DATE_TIME_PARSE_SECOND | G_DATE_TIME_PARSE_SUBSECOND);
   g_date_time_unref (dt);
 
+  /* Can't parse time without date */
+  dt = g_date_time_new_from_iso8601 ("22", &flags);
+  g_assert (dt == NULL);
+  dt = g_date_time_new_from_iso8601 ("22:10", &flags);
+  g_assert (dt == NULL);
+  dt = g_date_time_new_from_iso8601 ("22:10:42", &flags);
+  g_assert (dt == NULL);
+  dt = g_date_time_new_from_iso8601 ("22:10:42.123456", &flags);
+  g_assert (dt == NULL);
+  dt = g_date_time_new_from_iso8601 ("2210", &flags);
+  g_assert (dt == NULL);
+  dt = g_date_time_new_from_iso8601 ("221042", &flags);
+  g_assert (dt == NULL);
+  dt = g_date_time_new_from_iso8601 ("221042.123456", &flags);
+
   dt = g_date_time_new_from_iso8601 ("2016-08-24T22", &flags);
   ASSERT_DATE (dt, 2016, 8, 24);
   ASSERT_TIME (dt, 22, 0, 0);
