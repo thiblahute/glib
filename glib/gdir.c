@@ -206,10 +206,10 @@ g_dir_open (const gchar  *path,
  *
  * Since: 2.38
  **/
+#ifdef G_OS_UNIX
 GDir *
 g_dir_new_from_dirp (gpointer dirp)
 {
-#ifdef G_OS_UNIX
   GDir *dir;
 
   g_return_val_if_fail (dirp != NULL, NULL);
@@ -218,10 +218,8 @@ g_dir_new_from_dirp (gpointer dirp)
   dir->dirp = dirp;
 
   return dir;
-#else
-  g_assert_not_reached ();
-#endif
 }
+#endif
 
 /**
  * g_dir_read_name:
