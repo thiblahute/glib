@@ -1,0 +1,16 @@
+---
+symbols:
+- G_IEEE754_FLOAT_BIAS
+- G_IEEE754_DOUBLE_BIAS
+- GFloatIEEE754
+- GDoubleIEEE754
+- G_E
+- G_LN2
+- G_LN10
+- G_PI
+- G_PI_2
+- G_PI_4
+- G_SQRT2
+- G_LOG_2_BASE_10
+...
+

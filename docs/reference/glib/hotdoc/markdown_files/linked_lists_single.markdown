@@ -1,0 +1,36 @@
+---
+symbols:
+- GSList
+- g_slist_alloc
+- g_slist_append
+- g_slist_prepend
+- g_slist_insert
+- g_slist_insert_before
+- g_slist_insert_sorted
+- g_slist_remove
+- g_slist_remove_link
+- g_slist_delete_link
+- g_slist_remove_all
+- g_slist_free
+- g_slist_free_full
+- g_slist_free_1
+- g_slist_free1
+- g_slist_length
+- g_slist_copy
+- g_slist_copy_deep
+- g_slist_reverse
+- g_slist_insert_sorted_with_data
+- g_slist_sort
+- g_slist_sort_with_data
+- g_slist_concat
+- g_slist_foreach
+- g_slist_last
+- g_slist_next
+- g_slist_nth
+- g_slist_nth_data
+- g_slist_find
+- g_slist_find_custom
+- g_slist_position
+- g_slist_index
+...
+

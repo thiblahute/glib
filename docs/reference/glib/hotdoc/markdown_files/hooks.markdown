@@ -1,0 +1,45 @@
+---
+symbols:
+- GHookList
+- GHookFinalizeFunc
+- GHook
+- GHookFunc
+- GHookCheckFunc
+- g_hook_list_init
+- g_hook_list_invoke
+- g_hook_list_invoke_check
+- g_hook_list_marshal
+- GHookMarshaller
+- g_hook_list_marshal_check
+- GHookCheckMarshaller
+- g_hook_list_clear
+- g_hook_alloc
+- g_hook_append
+- g_hook_prepend
+- g_hook_insert_before
+- g_hook_insert_sorted
+- GHookCompareFunc
+- g_hook_compare_ids
+- g_hook_get
+- g_hook_find
+- GHookFindFunc
+- g_hook_find_data
+- g_hook_find_func
+- g_hook_find_func_data
+- g_hook_first_valid
+- g_hook_next_valid
+- GHookFlagMask
+- G_HOOK_FLAGS
+- G_HOOK_FLAG_USER_SHIFT
+- G_HOOK
+- G_HOOK_IS_VALID
+- G_HOOK_ACTIVE
+- G_HOOK_IN_CALL
+- G_HOOK_IS_UNLINKED
+- g_hook_ref
+- g_hook_unref
+- g_hook_free
+- g_hook_destroy
+- g_hook_destroy_link
+...
+

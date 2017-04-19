@@ -1,0 +1,38 @@
+---
+symbols:
+- G_LOG_DOMAIN
+- G_LOG_FATAL_MASK
+- G_LOG_LEVEL_USER_SHIFT
+- GLogFunc
+- GLogLevelFlags
+- g_log
+- g_logv
+- g_message
+- g_warning
+- g_critical
+- g_error
+- g_info
+- g_debug
+- g_log_set_handler
+- g_log_set_handler_full
+- g_log_remove_handler
+- g_log_set_always_fatal
+- g_log_set_fatal_mask
+- g_log_default_handler
+- g_log_set_default_handler
+- g_log_structured
+- g_log_variant
+- GLogField
+- g_log_structured_array
+- G_DEBUG_HERE
+- GLogWriterOutput
+- GLogWriterFunc
+- g_log_set_writer_func
+- g_log_writer_supports_color
+- g_log_writer_is_journald
+- g_log_writer_format_fields
+- g_log_writer_journald
+- g_log_writer_standard_streams
+- g_log_writer_default
+...
+

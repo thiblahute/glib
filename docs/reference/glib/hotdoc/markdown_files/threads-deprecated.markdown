@@ -1,0 +1,6 @@
+---
+symbols:
+- G_THREADS_IMPL_POSIX
+- G_THREADS_ENABLED
+...
+

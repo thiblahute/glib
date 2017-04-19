@@ -1,0 +1,53 @@
+---
+symbols:
+- GIOChannel
+- g_io_channel_unix_new
+- g_io_channel_unix_get_fd
+- g_io_channel_init
+- g_io_channel_new_file
+- g_io_channel_read_chars
+- g_io_channel_read_unichar
+- g_io_channel_read_line
+- g_io_channel_read_line_string
+- g_io_channel_read_to_end
+- g_io_channel_write_chars
+- g_io_channel_write_unichar
+- g_io_channel_flush
+- g_io_channel_seek_position
+- GSeekType
+- g_io_channel_shutdown
+- GIOStatus
+- GIOChannelError
+- G_IO_CHANNEL_ERROR
+- g_io_channel_error_from_errno
+- g_io_channel_ref
+- g_io_channel_unref
+- g_io_create_watch
+- g_io_add_watch
+- g_io_add_watch_full
+- GIOCondition
+- GIOFunc
+- GIOFuncs
+- g_io_channel_get_buffer_size
+- g_io_channel_set_buffer_size
+- g_io_channel_get_buffer_condition
+- g_io_channel_get_flags
+- g_io_channel_set_flags
+- GIOFlags
+- g_io_channel_get_line_term
+- g_io_channel_set_line_term
+- g_io_channel_get_buffered
+- g_io_channel_set_buffered
+- g_io_channel_get_encoding
+- g_io_channel_set_encoding
+- g_io_channel_get_close_on_unref
+- g_io_channel_set_close_on_unref
+- g_io_channel_read
+- GIOError
+- g_io_channel_write
+- g_io_channel_seek
+- g_io_channel_close
+- g_io_channel_error_quark
+- G_IO_FLAG_IS_WRITEABLE
+...
+

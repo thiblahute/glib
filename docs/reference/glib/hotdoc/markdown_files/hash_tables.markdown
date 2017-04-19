@@ -1,0 +1,51 @@
+---
+symbols:
+- GHashTable
+- g_hash_table_new
+- g_hash_table_new_full
+- GHashFunc
+- GEqualFunc
+- g_hash_table_insert
+- g_hash_table_replace
+- g_hash_table_add
+- g_hash_table_contains
+- g_hash_table_size
+- g_hash_table_lookup
+- g_hash_table_lookup_extended
+- g_hash_table_foreach
+- g_hash_table_find
+- GHFunc
+- g_hash_table_remove
+- g_hash_table_steal
+- g_hash_table_foreach_remove
+- g_hash_table_foreach_steal
+- g_hash_table_remove_all
+- g_hash_table_steal_all
+- g_hash_table_get_keys
+- g_hash_table_get_values
+- g_hash_table_get_keys_as_array
+- GHRFunc
+- g_hash_table_freeze
+- g_hash_table_thaw
+- g_hash_table_destroy
+- g_hash_table_ref
+- g_hash_table_unref
+- GHashTableIter
+- g_hash_table_iter_init
+- g_hash_table_iter_next
+- g_hash_table_iter_get_hash_table
+- g_hash_table_iter_replace
+- g_hash_table_iter_remove
+- g_hash_table_iter_steal
+- g_direct_equal
+- g_direct_hash
+- g_int_equal
+- g_int_hash
+- g_int64_equal
+- g_int64_hash
+- g_double_equal
+- g_double_hash
+- g_str_equal
+- g_str_hash
+...
+

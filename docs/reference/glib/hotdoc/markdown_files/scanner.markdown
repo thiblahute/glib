@@ -1,0 +1,41 @@
+---
+symbols:
+- GScanner
+- GScannerConfig
+- g_scanner_new
+- g_scanner_destroy
+- g_scanner_input_file
+- g_scanner_sync_file_offset
+- g_scanner_input_text
+- g_scanner_peek_next_token
+- g_scanner_get_next_token
+- g_scanner_eof
+- g_scanner_cur_line
+- g_scanner_cur_position
+- g_scanner_cur_token
+- g_scanner_cur_value
+- g_scanner_set_scope
+- g_scanner_scope_add_symbol
+- g_scanner_scope_foreach_symbol
+- g_scanner_scope_lookup_symbol
+- g_scanner_scope_remove_symbol
+- g_scanner_add_symbol
+- g_scanner_remove_symbol
+- g_scanner_foreach_symbol
+- g_scanner_freeze_symbol_table
+- g_scanner_thaw_symbol_table
+- g_scanner_lookup_symbol
+- g_scanner_warn
+- g_scanner_error
+- g_scanner_unexp_token
+- GScannerMsgFunc
+- G_CSET_a_2_z
+- G_CSET_A_2_Z
+- G_CSET_DIGITS
+- G_CSET_LATINC
+- G_CSET_LATINS
+- GTokenType
+- GTokenValue
+- GErrorType
+...
+

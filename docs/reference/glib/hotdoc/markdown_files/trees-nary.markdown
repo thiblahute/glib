@@ -1,0 +1,47 @@
+---
+symbols:
+- GNode
+- g_node_new
+- g_node_copy
+- GCopyFunc
+- g_node_copy_deep
+- g_node_insert
+- g_node_insert_before
+- g_node_insert_after
+- g_node_append
+- g_node_prepend
+- g_node_insert_data
+- g_node_insert_data_after
+- g_node_insert_data_before
+- g_node_append_data
+- g_node_prepend_data
+- g_node_reverse_children
+- g_node_traverse
+- GTraverseType
+- GTraverseFlags
+- GNodeTraverseFunc
+- g_node_children_foreach
+- GNodeForeachFunc
+- g_node_get_root
+- g_node_find
+- g_node_find_child
+- g_node_child_index
+- g_node_child_position
+- g_node_first_child
+- g_node_last_child
+- g_node_nth_child
+- g_node_first_sibling
+- g_node_next_sibling
+- g_node_prev_sibling
+- g_node_last_sibling
+- G_NODE_IS_LEAF
+- G_NODE_IS_ROOT
+- g_node_depth
+- g_node_n_nodes
+- g_node_n_children
+- g_node_is_ancestor
+- g_node_max_height
+- g_node_unlink
+- g_node_destroy
+...
+

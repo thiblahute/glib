@@ -1,0 +1,33 @@
+---
+symbols:
+- g_new
+- g_new0
+- g_renew
+- g_try_new
+- g_try_new0
+- g_try_renew
+- g_malloc
+- g_malloc0
+- g_realloc
+- g_try_malloc
+- g_try_malloc0
+- g_try_realloc
+- g_malloc_n
+- g_malloc0_n
+- g_realloc_n
+- g_try_malloc_n
+- g_try_malloc0_n
+- g_try_realloc_n
+- g_free
+- g_clear_pointer
+- g_steal_pointer
+- g_alloca
+- g_newa
+- g_memmove
+- g_memdup
+- GMemVTable
+- g_mem_set_vtable
+- g_mem_is_system_malloc
+- g_mem_profile
+...
+

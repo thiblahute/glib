@@ -1,0 +1,42 @@
+---
+symbols:
+- GList
+- g_list_append
+- g_list_prepend
+- g_list_insert
+- g_list_insert_before
+- g_list_insert_sorted
+- g_list_remove
+- g_list_remove_link
+- g_list_delete_link
+- g_list_remove_all
+- g_list_free
+- g_list_free_full
+- g_list_alloc
+- g_list_free_1
+- g_list_free1
+- g_list_length
+- g_list_copy
+- g_list_copy_deep
+- g_list_reverse
+- g_list_sort
+- GCompareFunc
+- g_list_insert_sorted_with_data
+- g_list_sort_with_data
+- GCompareDataFunc
+- g_list_concat
+- g_list_foreach
+- GFunc
+- g_list_first
+- g_list_last
+- g_list_previous
+- g_list_next
+- g_list_nth
+- g_list_nth_data
+- g_list_nth_prev
+- g_list_find
+- g_list_find_custom
+- g_list_position
+- g_list_index
+...
+

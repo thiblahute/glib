@@ -1,0 +1,52 @@
+---
+symbols:
+- GRegexError
+- G_REGEX_ERROR
+- GRegexCompileFlags
+- GRegexMatchFlags
+- GRegex
+- GRegexEvalCallback
+- g_regex_new
+- g_regex_ref
+- g_regex_unref
+- g_regex_get_pattern
+- g_regex_get_max_backref
+- g_regex_get_capture_count
+- g_regex_get_has_cr_or_lf
+- g_regex_get_max_lookbehind
+- g_regex_get_string_number
+- g_regex_get_compile_flags
+- g_regex_get_match_flags
+- g_regex_escape_string
+- g_regex_escape_nul
+- g_regex_match_simple
+- g_regex_match
+- g_regex_match_full
+- g_regex_match_all
+- g_regex_match_all_full
+- g_regex_split_simple
+- g_regex_split
+- g_regex_split_full
+- g_regex_replace
+- g_regex_replace_literal
+- g_regex_replace_eval
+- g_regex_check_replacement
+- GMatchInfo
+- g_match_info_get_regex
+- g_match_info_get_string
+- g_match_info_ref
+- g_match_info_unref
+- g_match_info_free
+- g_match_info_matches
+- g_match_info_next
+- g_match_info_get_match_count
+- g_match_info_is_partial_match
+- g_match_info_expand_references
+- g_match_info_fetch
+- g_match_info_fetch_pos
+- g_match_info_fetch_named
+- g_match_info_fetch_named_pos
+- g_match_info_fetch_all
+- g_regex_error_quark
+...
+

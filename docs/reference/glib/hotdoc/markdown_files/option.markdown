@@ -1,0 +1,47 @@
+---
+symbols:
+- GOptionError
+- G_OPTION_ERROR
+- GOptionArgFunc
+- GOptionContext
+- g_option_context_new
+- g_option_context_set_summary
+- g_option_context_get_summary
+- g_option_context_set_description
+- g_option_context_get_description
+- GTranslateFunc
+- g_option_context_set_translate_func
+- g_option_context_set_translation_domain
+- g_option_context_free
+- g_option_context_parse
+- g_option_context_parse_strv
+- g_option_context_set_help_enabled
+- g_option_context_get_help_enabled
+- g_option_context_set_ignore_unknown_options
+- g_option_context_get_ignore_unknown_options
+- g_option_context_get_help
+- g_option_context_get_strict_posix
+- g_option_context_set_strict_posix
+- GOptionArg
+- GOptionFlags
+- G_OPTION_REMAINING
+- GOptionEntry
+- g_option_context_add_main_entries
+- GOptionGroup
+- g_option_context_add_group
+- g_option_context_set_main_group
+- g_option_context_get_main_group
+- g_option_group_new
+- g_option_group_ref
+- g_option_group_unref
+- g_option_group_free
+- g_option_group_add_entries
+- GOptionParseFunc
+- g_option_group_set_parse_hooks
+- GOptionErrorFunc
+- g_option_group_set_error_hook
+- g_option_group_set_translate_func
+- g_option_group_set_translation_domain
+- g_option_error_quark
+...
+

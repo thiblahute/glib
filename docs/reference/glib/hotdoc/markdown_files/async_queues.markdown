@@ -1,0 +1,33 @@
+---
+symbols:
+- GAsyncQueue
+- g_async_queue_new
+- g_async_queue_new_full
+- g_async_queue_ref
+- g_async_queue_unref
+- g_async_queue_push
+- g_async_queue_push_sorted
+- g_async_queue_push_front
+- g_async_queue_remove
+- g_async_queue_pop
+- g_async_queue_try_pop
+- g_async_queue_timeout_pop
+- g_async_queue_length
+- g_async_queue_sort
+- g_async_queue_lock
+- g_async_queue_unlock
+- g_async_queue_ref_unlocked
+- g_async_queue_unref_and_unlock
+- g_async_queue_push_unlocked
+- g_async_queue_push_sorted_unlocked
+- g_async_queue_push_front_unlocked
+- g_async_queue_remove_unlocked
+- g_async_queue_pop_unlocked
+- g_async_queue_try_pop_unlocked
+- g_async_queue_timeout_pop_unlocked
+- g_async_queue_length_unlocked
+- g_async_queue_sort_unlocked
+- g_async_queue_timed_pop
+- g_async_queue_timed_pop_unlocked
+...
+

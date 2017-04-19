@@ -1,0 +1,52 @@
+---
+symbols:
+- GFileError
+- G_FILE_ERROR
+- GFileTest
+- g_file_error_from_errno
+- g_file_get_contents
+- g_file_set_contents
+- g_file_test
+- g_mkstemp
+- g_mkstemp_full
+- g_file_open_tmp
+- g_file_read_link
+- g_mkdir_with_parents
+- g_mkdtemp
+- g_mkdtemp_full
+- g_dir_make_tmp
+- GDir
+- g_dir_open
+- g_dir_read_name
+- g_dir_rewind
+- g_dir_close
+- GMappedFile
+- g_mapped_file_new
+- g_mapped_file_new_from_fd
+- g_mapped_file_ref
+- g_mapped_file_unref
+- g_mapped_file_free
+- g_mapped_file_get_length
+- g_mapped_file_get_contents
+- g_mapped_file_get_bytes
+- g_open
+- g_rename
+- g_mkdir
+- GStatBuf
+- g_stat
+- g_lstat
+- g_unlink
+- g_remove
+- g_rmdir
+- g_fopen
+- g_freopen
+- g_chmod
+- g_access
+- g_creat
+- g_chdir
+- g_utime
+- g_close
+- g_file_error_quark
+- utimbuf
+...
+

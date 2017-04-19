@@ -1,0 +1,17 @@
+---
+symbols:
+- _
+- Q_
+- C_
+- N_
+- NC_
+- g_dgettext
+- g_dcgettext
+- g_dngettext
+- g_dpgettext
+- g_dpgettext2
+- g_strip_context
+- g_get_language_names
+- g_get_locale_variants
+...
+
